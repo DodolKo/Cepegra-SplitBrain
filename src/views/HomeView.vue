@@ -5,6 +5,7 @@ import GridArea from '@/components/GridArea.vue'
 import StartButton from '@/components/StartButton.vue'
 import ResetButton from '@/components/ResetButton.vue'
 import GameOverScreen from '@/components/GameOverScreen.vue'
+import WinScreen from '@/components/WinScreen.vue'
 import { useGameStore } from '@/stores/game'
 
 const gameStore = useGameStore()
@@ -28,7 +29,7 @@ const handleKeyDown = (event) => {
     return
   }
 
-  if (!isGameStarted.value || isGameOver.value) return
+  if (!isGameStarted.value || isGameOver.value || isWon.value) return
 
   // Prevent default scrolling for arrow keys
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
@@ -112,5 +113,6 @@ onUnmounted(() => {
     </div>
     <audio id="win-sound" src="/assets/victory.mp3" preload="auto"></audio>
     <GameOverScreen v-if="isGameOver && !isWon" />
+    <WinScreen v-if="isWon" />
   </main>
 </template>
