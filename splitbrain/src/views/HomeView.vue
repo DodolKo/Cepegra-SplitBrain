@@ -1,13 +1,16 @@
 <script setup>
 import GridArea from '@/components/GridArea.vue';
 import StartButton from '@/components/StartButton.vue';
+import ResetButton from '@/components/ResetButton.vue';
+import { useGameStore } from '@/stores/game';
+import { useCounterStore } from '@/stores/counter';
 </script>
 
 <template>
   <main>
     <h1>🧠 Split Brain</h1>
     <div id="info-bar">
-      <span id="timer">⏱️ 0s</span> | <span id="level">Level 1 / 2</span> |
+      <span id="timer">⏱️ {{ useCounterStore().count }}s</span> | <span id="level">Level 1 / 2</span> |
       <span id="countdown">⏳ 60s remaining</span> |
       <span id="totalTime">Total time : 0s</span>
     </div>
@@ -18,7 +21,8 @@ import StartButton from '@/components/StartButton.vue';
       </p>
       <p><strong>Player 2 (right)</strong> : Arrow keys ← ↑ ↓ →</p>
     </div>
-    <StartButton />
+    <StartButton v-if="!useGameStore().isPlaying"/>
+    <ResetButton v-else/>
     <div class="grid-container">
       <div id="left" class="grid">
         <GridArea />

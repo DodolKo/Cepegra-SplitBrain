@@ -9,7 +9,8 @@ export const useGameStore = defineStore('game', {
     score: 0,
     level: 1,
     isGameOver: false,
-    isWon: false
+    isWon: false,
+    isPlaying: false
   }),
   getters: {
     highScore: (state) => state.score * state.level,
@@ -35,6 +36,7 @@ export const useGameStore = defineStore('game', {
     startGame() {
       this.isGameOver = false
       this.isWon = false
+      this.isPlaying = true
       this.counterStore.start()
     }
   }
