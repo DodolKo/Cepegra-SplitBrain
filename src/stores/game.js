@@ -31,13 +31,17 @@ export const useGameStore = defineStore('game', {
     // Timer state
     elapsedTime: 0,
     remainingTime: 60,
-    timerInterval: null
+    timerInterval: null,
+    
+    // Level reached when timer expires
+    reachedLevelIndex: 0
   }),
   
   getters: {
     highScore: (state) => state.score * (state.currentLevelIndex + 1),
     gameStatus: (state) => state.isGameOver ? 'Game Over' : 'In Progress',
     currentLevel: (state) => levels[state.currentLevelIndex] || null,
+    reachedLevel: (state) => levels[state.reachedLevelIndex] || null,
     totalLevels: () => levels.length,
     levelDisplay: (state) => `${state.currentLevelIndex + 1} / ${levels.length}`
   },
@@ -152,7 +156,7 @@ export const useGameStore = defineStore('game', {
      * Move player 1 (ZQSD controls)
      */
     movePlayer1(direction) {
-      if (this.isLevelComplete || !this.isGameStarted) return false
+      if (this.isLevelComplete || !this.isGameStarted || this.isGameOver) return false
       
       let dx = 0
       let dy = 0
@@ -191,7 +195,7 @@ export const useGameStore = defineStore('game', {
      * Move player 2 (arrow keys)
      */
     movePlayer2(direction) {
-      if (this.isLevelComplete || !this.isGameStarted) return false
+      if (this.isLevelComplete || !this.isGameStarted || this.isGameOver) return false
       
       let dx = 0
       let dy = 0
@@ -297,7 +301,8 @@ export const useGameStore = defineStore('game', {
         if (this.remainingTime > 0) {
           this.remainingTime--
         } else {
-          // Time's up
+          // Time's up - save the level reached (current level before timer expired)
+          this.reachedLevelIndex = this.currentLevelIndex
           this.isGameOver = true
           this.stopTimer()
         }
@@ -336,6 +341,7 @@ export const useGameStore = defineStore('game', {
       this.isGameStarted = false
       this.isLevelComplete = false
       this.elapsedTime = 0
+      this.reachedLevelIndex = 0
       this.stopTimer()
       this.loadLevel(0)
     }

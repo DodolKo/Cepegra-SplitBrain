@@ -4,10 +4,11 @@ import { storeToRefs } from 'pinia'
 import GridArea from '@/components/GridArea.vue'
 import StartButton from '@/components/StartButton.vue'
 import ResetButton from '@/components/ResetButton.vue'
+import GameOverScreen from '@/components/GameOverScreen.vue'
 import { useGameStore } from '@/stores/game'
 
 const gameStore = useGameStore()
-const { levelDisplay, elapsedTime, remainingTime, isGameStarted } = storeToRefs(gameStore)
+const { levelDisplay, elapsedTime, remainingTime, isGameStarted, isGameOver, isWon } = storeToRefs(gameStore)
 
 // Keyboard input handling
 const handleKeyDown = (event) => {
@@ -27,7 +28,7 @@ const handleKeyDown = (event) => {
     return
   }
 
-  if (!isGameStarted.value) return
+  if (!isGameStarted.value || isGameOver.value) return
 
   // Prevent default scrolling for arrow keys
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
@@ -110,5 +111,6 @@ onUnmounted(() => {
       </div>
     </div>
     <audio id="win-sound" src="/assets/victory.mp3" preload="auto"></audio>
+    <GameOverScreen v-if="isGameOver && !isWon" />
   </main>
 </template>
