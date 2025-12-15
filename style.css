@@ -1,0 +1,94 @@
+
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background: #111;
+  color: white;
+}
+
+.grid-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  gap: 2rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+  gap: 2px;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  background: #222;
+  transition: background 0.2s ease;
+}
+
+.wall {
+  background: gray;
+}
+
+.goal {
+  background: gold;
+}
+
+.player {
+  background: cyan;
+  animation: pop 0.15s;
+}
+
+.player2 {
+  background: magenta;
+  animation: pop 0.15s;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.victory-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  color: gold;
+  padding: 2rem 3rem;
+  font-size: 2rem;
+  border: 3px solid gold;
+  border-radius: 10px;
+  z-index: 9999;
+  box-shadow: 0 0 15px gold;
+}
+
+.instructions {
+  background: black;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 600px;
+  font-family: sans-serif;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  margin: auto;
+}
+.instructions h2 {
+  margin: 0.5rem 0;
+}
+.instructions p {
+  margin: 0.2rem 0;
+  font-size: 1rem;
+}
+#info-bar {
+  font-family: sans-serif;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
