@@ -1,5 +1,6 @@
 <script setup>
 import GridArea from '@/components/GridArea.vue';
+import StartButton from '@/components/StartButton.vue';
 </script>
 
 <template>
@@ -17,6 +18,7 @@ import GridArea from '@/components/GridArea.vue';
       </p>
       <p><strong>Player 2 (right)</strong> : Arrow keys ← ↑ ↓ →</p>
     </div>
+    <StartButton />
     <div class="grid-container">
       <div id="left" class="grid">
         <GridArea />

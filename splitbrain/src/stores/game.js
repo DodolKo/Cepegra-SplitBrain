@@ -1,5 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { useCounterStore } from './counter'
+
+const counterStore = useCounterStore()
 
 export const useGameStore = defineStore('game', {
   state: () => ({
@@ -18,6 +21,21 @@ export const useGameStore = defineStore('game', {
     },
     increaseLevel() {
       this.level++
+    },
+    endGame(won) {
+      this.isGameOver = true
+      this.isWon = won
+    },
+    resetGame() {
+      this.score = 0
+      this.level = 1
+      this.isGameOver = false
+      this.isWon = false
+    },
+    startGame() {
+      this.isGameOver = false
+      this.isWon = false
+      counterStore.reset()
     }
   }
 })
