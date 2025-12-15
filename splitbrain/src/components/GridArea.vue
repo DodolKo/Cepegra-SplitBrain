@@ -1,7 +1,7 @@
 <template>
   <div class="grid-area">
     <div
-      v-for="(row, y) in grid"
+      v-for="(row, y) in currentGrid"
       :key="y"
       class="grid-row"
     >
@@ -37,7 +37,11 @@ const props = defineProps({
 })
 
 const gameStore = useGameStore()
-const { grid, player1, player2, exit1, exit2 } = storeToRefs(gameStore)
+const { grid1, grid2, player1, player2, exit1, exit2 } = storeToRefs(gameStore)
+
+const currentGrid = computed(() => {
+  return props.playerNumber === '1' ? grid1.value : grid2.value
+})
 
 const currentPlayer = computed(() => {
   return props.playerNumber === '1' ? player1.value : player2.value

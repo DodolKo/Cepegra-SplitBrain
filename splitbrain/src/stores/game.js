@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import { levels } from './levels'
 import { useCounterStore } from './counter'
 
-const counterStore = useCounterStore()
-
 export const useGameStore = defineStore('game', {
   state: () => ({
     // Game state
@@ -14,10 +12,13 @@ export const useGameStore = defineStore('game', {
     isLevelComplete: false,
     isGameStarted: false,
     
-    // Grid state
-    grid: [],
-    gridWidth: 0,
-    gridHeight: 0,
+    // Grid state (separate layouts for player 1 and 2)
+    grid1: [],
+    grid1Width: 0,
+    grid1Height: 0,
+    grid2: [],
+    grid2Width: 0,
+    grid2Height: 0,
     
     // Player positions { x, y }
     player1: { x: 0, y: 0 },
@@ -46,53 +47,63 @@ export const useGameStore = defineStore('game', {
      * Parse ASCII grid into internal structure
      */
     parseLevel(levelData) {
-      const { grid: gridStrings } = levelData
-      const height = gridStrings.length
-      const width = gridStrings[0]?.length || 0
-      
-      const parsedGrid = []
-      let player1Start = null
-      let player2Start = null
-      let exit1Pos = null
-      let exit2Pos = null
-      
-      for (let y = 0; y < height; y++) {
-        const row = []
-        for (let x = 0; x < width; x++) {
-          const char = gridStrings[y][x]
-          
-          if (char === '#') {
-            row.push({ type: 'wall', x, y })
-          } else if (char === '.') {
-            row.push({ type: 'floor', x, y })
-          } else if (char === 'A') {
-            row.push({ type: 'floor', x, y })
-            player1Start = { x, y }
-          } else if (char === 'B') {
-            row.push({ type: 'floor', x, y })
-            player2Start = { x, y }
-          } else if (char === '1') {
-            row.push({ type: 'floor', x, y })
-            exit1Pos = { x, y }
-          } else if (char === '2') {
-            row.push({ type: 'floor', x, y })
-            exit2Pos = { x, y }
-          } else {
-            // Default to floor for unknown chars
-            row.push({ type: 'floor', x, y })
+      // Support either a single shared grid or two separate grids
+      const grid1Strings = levelData.grid1 || levelData.grid
+      const grid2Strings = levelData.grid2 || grid1Strings
+
+      const parseGrid = (gridStrings, startChar, exitChar) => {
+        const height = gridStrings.length
+        const width = gridStrings[0]?.length || 0
+        const parsedGrid = []
+        let startPos = null
+        let exitPos = null
+
+        for (let y = 0; y < height; y++) {
+          const row = []
+          for (let x = 0; x < width; x++) {
+            const char = gridStrings[y][x]
+
+            if (char === '#') {
+              row.push({ type: 'wall', x, y })
+            } else if (char === '.') {
+              row.push({ type: 'floor', x, y })
+            } else if (char === startChar) {
+              row.push({ type: 'floor', x, y })
+              startPos = { x, y }
+            } else if (char === exitChar) {
+              row.push({ type: 'floor', x, y })
+              exitPos = { x, y }
+            } else {
+              // Default to floor for unknown chars
+              row.push({ type: 'floor', x, y })
+            }
           }
+          parsedGrid.push(row)
         }
-        parsedGrid.push(row)
+
+        return {
+          grid: parsedGrid,
+          width,
+          height,
+          start: startPos || { x: 0, y: 0 },
+          exit: exitPos || { x: 0, y: 0 }
+        }
       }
-      
+
+      const parsed1 = parseGrid(grid1Strings, 'A', '1')
+      const parsed2 = parseGrid(grid2Strings, 'B', '2')
+
       return {
-        grid: parsedGrid,
-        width,
-        height,
-        player1Start: player1Start || { x: 0, y: 0 },
-        player2Start: player2Start || { x: 0, y: 0 },
-        exit1: exit1Pos || { x: 0, y: 0 },
-        exit2: exit2Pos || { x: 0, y: 0 }
+        grid1: parsed1.grid,
+        grid1Width: parsed1.width,
+        grid1Height: parsed1.height,
+        grid2: parsed2.grid,
+        grid2Width: parsed2.width,
+        grid2Height: parsed2.height,
+        player1Start: parsed1.start,
+        player2Start: parsed2.start,
+        exit1: parsed1.exit,
+        exit2: parsed2.exit
       }
     },
     
@@ -109,14 +120,19 @@ export const useGameStore = defineStore('game', {
       const parsed = this.parseLevel(levelData)
       
       this.currentLevelIndex = index
-      this.grid = parsed.grid
-      this.gridWidth = parsed.width
-      this.gridHeight = parsed.height
+      this.grid1 = parsed.grid1
+      this.grid1Width = parsed.grid1Width
+      this.grid1Height = parsed.grid1Height
+      this.grid2 = parsed.grid2
+      this.grid2Width = parsed.grid2Width
+      this.grid2Height = parsed.grid2Height
       this.player1 = { ...parsed.player1Start }
       this.player2 = { ...parsed.player2Start }
       this.exit1 = { ...parsed.exit1 }
       this.exit2 = { ...parsed.exit2 }
       this.isLevelComplete = false
+      // Per-level timer
+      this.remainingTime = levelData.timeLimit ?? 60
       
       return true
     },
@@ -124,11 +140,11 @@ export const useGameStore = defineStore('game', {
     /**
      * Check if a position is valid (within bounds and not a wall)
      */
-    canMoveTo(x, y) {
-      if (x < 0 || x >= this.gridWidth || y < 0 || y >= this.gridHeight) {
+    canMoveTo(x, y, grid, width, height) {
+      if (x < 0 || x >= width || y < 0 || y >= height) {
         return false
       }
-      const cell = this.grid[y]?.[x]
+      const cell = grid[y]?.[x]
       return cell && cell.type !== 'wall'
     },
     
@@ -161,7 +177,7 @@ export const useGameStore = defineStore('game', {
       const newX = this.player1.x + dx
       const newY = this.player1.y + dy
       
-      if (this.canMoveTo(newX, newY)) {
+      if (this.canMoveTo(newX, newY, this.grid1, this.grid1Width, this.grid1Height)) {
         this.player1.x = newX
         this.player1.y = newY
         this.checkWin()
@@ -200,7 +216,7 @@ export const useGameStore = defineStore('game', {
       const newX = this.player2.x + dx
       const newY = this.player2.y + dy
       
-      if (this.canMoveTo(newX, newY)) {
+      if (this.canMoveTo(newX, newY, this.grid2, this.grid2Width, this.grid2Height)) {
         this.player2.x = newX
         this.player2.y = newY
         this.checkWin()
@@ -259,13 +275,13 @@ export const useGameStore = defineStore('game', {
      * Start the game
      */
     startGame() {
+      const counterStore = useCounterStore()
       this.isGameOver = false
       this.isWon = false
       this.isGameStarted = true
       this.currentLevelIndex = 0
       this.score = 0
       this.elapsedTime = 0
-      this.remainingTime = 60
       this.loadLevel(0)
       this.startTimer()
       counterStore.reset()
@@ -320,7 +336,6 @@ export const useGameStore = defineStore('game', {
       this.isGameStarted = false
       this.isLevelComplete = false
       this.elapsedTime = 0
-      this.remainingTime = 60
       this.stopTimer()
       this.loadLevel(0)
     }

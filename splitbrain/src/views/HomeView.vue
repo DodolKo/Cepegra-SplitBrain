@@ -11,6 +11,22 @@ const { levelDisplay, elapsedTime, remainingTime, isGameStarted } = storeToRefs(
 
 // Keyboard input handling
 const handleKeyDown = (event) => {
+  // Space: start or restart the game
+  if (event.code === 'Space' || event.key === ' ') {
+    event.preventDefault()
+
+    if (!isGameStarted.value) {
+      // Start from idle state
+      gameStore.startGame()
+    } else if (gameStore.isGameOver) {
+      // Restart when game is over
+      gameStore.resetGame()
+      gameStore.startGame()
+    }
+
+    return
+  }
+
   if (!isGameStarted.value) return
 
   // Prevent default scrolling for arrow keys
@@ -67,7 +83,10 @@ onUnmounted(() => {
 
 <template>
   <main>
-    <h1>🧠 Split Brain</h1>
+    <div class="header-row">
+      <h1>🧠 Split Brain</h1>
+      <button class="editor-button" @click="$router.push('/editor')">🎨 Editor</button>
+    </div>
     <div id="info-bar">
       <span id="timer">⏱️ {{ elapsedTime }}s</span> | <span id="level">Level {{ levelDisplay }}</span> |
       <span id="countdown">⏳ {{ remainingTime }}s remaining</span> |
