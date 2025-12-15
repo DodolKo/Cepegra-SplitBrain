@@ -17,6 +17,7 @@ export const useCounterStore = defineStore('counter', {
     },
     start() {
       this.count = 0
+      console.log('Counter started')
       setInterval(() => {
         this.increment()
       }, 1000)
