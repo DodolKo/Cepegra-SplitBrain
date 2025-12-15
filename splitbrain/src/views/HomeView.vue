@@ -11,7 +11,7 @@ import { useCounterStore } from '@/stores/counter';
     <h1>🧠 Split Brain</h1>
     <div id="info-bar">
       <span id="timer">⏱️ {{ useCounterStore().count }}s</span> | <span id="level">Level 1 / 2</span> |
-      <span id="countdown">⏳ 60s remaining</span> |
+      <span id="countdown">⏳ {{ useCounterStore().leftTimer }} s remaining</span> |
       <span id="totalTime">Total time : 0s</span>
     </div>
     <div id="instructions" class="instructions">

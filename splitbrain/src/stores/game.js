@@ -24,8 +24,14 @@ export const useGameStore = defineStore('game', {
       this.level++
     },
     endGame(won) {
-      this.isGameOver = true
-      this.isWon = won
+      if (won) {
+        this.isGameOver = true
+        this.isWon = won
+      }
+      else {
+        this.isGameOver = true
+        this.isWon = false
+      }
     },
     resetGame() {
       this.score = 0

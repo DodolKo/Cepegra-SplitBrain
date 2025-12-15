@@ -1,9 +1,11 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
+
 export const useCounterStore = defineStore('counter', {
   state: () => ({
     count: ref(0),
+    leftTimer: ref(60),
     timer: null
   }),
   computed: {
@@ -14,6 +16,10 @@ export const useCounterStore = defineStore('counter', {
   actions: {
     increment() {
       this.count++
+      this.leftTimer--
+      if (this.leftTimer === 0) {
+        this.g
+      }
       console.log(`Count is now: ${this.count}`)
     },
     start() {
