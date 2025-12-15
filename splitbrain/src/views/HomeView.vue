@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import GridArea from '@/components/GridArea.vue'
 import StartButton from '@/components/StartButton.vue'
+import ResetButton from '@/components/ResetButton.vue'
 import { useGameStore } from '@/stores/game'
 
 const gameStore = useGameStore()
@@ -79,7 +80,8 @@ onUnmounted(() => {
       </p>
       <p><strong>Player 2 (right)</strong> : Arrow keys ← ↑ ↓ →</p>
     </div>
-    <StartButton />
+    <StartButton v-if="!isGameStarted" />
+    <ResetButton v-else />
     <div class="grid-container">
       <div id="left" class="grid">
         <GridArea player-number="1" />
