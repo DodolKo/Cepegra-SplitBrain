@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 
 export const useCounterStore = defineStore('counter', {
   state: () => ({
-    count: ref(0)
+    count: ref(0),
+    timer: null
   }),
   computed: {
     doubleCount() {
@@ -18,12 +19,17 @@ export const useCounterStore = defineStore('counter', {
     start() {
       this.count = 0
       console.log('Counter started')
-      setInterval(() => {
+      this.timer = setInterval(() => {
         this.increment()
       }, 1000)
     },
     reset() {
       this.count = 0
+      console.log('Counter reset')
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
     }
   }
 })

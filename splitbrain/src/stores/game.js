@@ -32,6 +32,8 @@ export const useGameStore = defineStore('game', {
       this.level = 1
       this.isGameOver = false
       this.isWon = false
+      this.isPlaying = false
+      this.counterStore.reset()
     },
     startGame() {
       this.isGameOver = false
